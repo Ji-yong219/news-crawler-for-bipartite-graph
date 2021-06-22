@@ -1,4 +1,11 @@
-# 16422034 박지용
+# 
+# NewyorktimesCrawler.py
+# Web crawling program for https://www.nytimes.com/
+# Author : Ji-yong219
+# Project Start:: 2020.12.18
+# Last Modified from Ji-yong 2021.06.22
+#
+
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys

@@ -11,20 +11,20 @@ han = Hannanum()#han.nouns(text)
 mcb = Mecab()
 morphology_analyzer = mcb
 
-import Crawler
-import KrCrawler
-import KrCrawler2
-from Translator import Translator
+from crawlers.WashingtonpostCrawler import WPCrawler
+
+from utils.Translator import translateTitle
+# import KrCrawler
+# import KrCrawler2
+# from Translator import Translator
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 from collections import Counter
 
 import networkx as nx
 import matplotlib.pyplot as plt
-import math
 import pandas as pd
 from pandas import DataFrame as df
-from pandas.plotting import table 
 import numpy as np
 
 import numba
@@ -36,14 +36,11 @@ sys.setrecursionlimit(5000)
 import nltk, re
 nltk.download('punkt')
 
-#import io
-#sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding = 'utf-8')
-#sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding = 'utf-8')
-
 import matplotlib.font_manager as fm 
 font_path = 'C:/Users/JY/AppData/Local/Microsoft/Windows/Fonts/BMJUA_ttf.ttf' 
 fontprop = fm.FontProperties(fname=font_path, size=24) 
 plt.rcParams['font.family'] = 'NanumGothic'
+
 
 
 
@@ -226,14 +223,14 @@ if __name__ == "__main__":
     # us_platform = "us-wp"
     us_platform = "us-nt"
 
-    us_crawl_run = True
+    us_crawl_run = False
     kr_crawl_run = False
     make_bipartite_img = False
 
-    task1_1_run = True # 연관 빈도수 그래프
-    task1_2_run = True # 히트 알고리즘
-    task2_run = True # 외국기사 나오고 한국기사 날짜
-    task3_run = True
+    task1_1_run = False # 연관 빈도수 그래프
+    task1_2_run = False # 히트 알고리즘
+    task2_run = False # 외국기사 나오고 한국기사 날짜
+    task3_run = False
     task4_run = False
 
     word_bipartite_run = False # 내가 따로 한거, 아직 ㄴ
@@ -253,20 +250,26 @@ if __name__ == "__main__":
     # selenium으로 크롤링하여 저장된 링크를 가지고 requests로 다시 크롤링하여 json으로 저장
     # kr은 requests로 동기식, us는 grequests와 async로 비동기식 (kr은 비동기가 안먹힘(다음뉴스 500 오류))
 
+    search = "trump"
+    start_date = "20201114"
+    end_date = "20210113"
+    # 크롤러 객체 생성
+    wp_crawler = WPCrawler(driver_url, chrome_options)
 
-    if us_crawl_run:
-        # 크롤러 객체 생성
-        us_news_crawler_t = Crawler.Crawler('', driver_url, chrome_options, us_platform)
-        us_news_crawler_t.crawlLinks('trump') # 링크 크롤링(selenium)
-        us_news_crawler_t.crawlNews('trump') # 뉴스 크롤링(async+grequest+bs4)
-        us_news_crawler_t.translateTitle('trump') # 구글 번역(selenium)
+    # wp_crawler.crawlLinks(search, start_date, end_date) # 링크 크롤링(selenium)
+    wp_crawler.crawlNews(search, start_date, end_date) # 뉴스 크롤링(async+grequest+bs4)
 
+    dic = {}
 
-        us_news_crawler_b = Crawler.Crawler('', driver_url, chrome_options, us_platform)
-        us_news_crawler_b.crawlLinks('biden') # 링크 크롤링(selenium)
-        us_news_crawler_b.crawlNews('biden') # 뉴스 크롤링(async+grequest+bs4)
-        us_news_crawler_b.translateTitle('biden') # 구글 번역(selenium)
+    with open(f'result/washingtonpost/news_{search}.json','r', encoding='utf8') as f:
+        dic = json.load(f)
+        
+    result_dic = translateTitle(search, driver_url, chrome_options, dic) # 구글 번역(selenium)
 
+    with open(f'result/washingtonpost/news_trans_{search}.json', 'w', encoding='utf8') as f:
+        json.dump(result_dic, f, indent=4, sort_keys=True, ensure_ascii=False)
+
+    exit()
 
     # 최신 빅카인즈 + 동적 크롤러 (국내 언론)
     if kr_crawl_run:
