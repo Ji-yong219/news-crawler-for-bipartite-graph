@@ -12,6 +12,8 @@ mcb = Mecab()
 morphology_analyzer = mcb
 
 from crawlers.WashingtonpostCrawler import WPCrawler
+from crawlers.NewyorktimesCrawler import NTCrawler
+from crawlers import BigKindsCrawler
 
 from utils.Translator import translateTitle
 # import KrCrawler
@@ -220,10 +222,8 @@ def get_clean_words(text, stopwords):
 
 
 if __name__ == "__main__":
-    # us_platform = "us-wp"
-    us_platform = "us-nt"
-
-    us_crawl_run = False
+    wp_crawl_run = True
+    nt_crawl_run = False
     kr_crawl_run = False
     make_bipartite_img = False
 
@@ -241,7 +241,7 @@ if __name__ == "__main__":
     driver_url = 'D:\\chromedriver.exe'
 
     chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument('--headless')
+    # chrome_options.add_argument('--headless')
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--privileged')
     chrome_options.add_argument('--incognito')
@@ -250,54 +250,86 @@ if __name__ == "__main__":
     # selenium으로 크롤링하여 저장된 링크를 가지고 requests로 다시 크롤링하여 json으로 저장
     # kr은 requests로 동기식, us는 grequests와 async로 비동기식 (kr은 비동기가 안먹힘(다음뉴스 500 오류))
 
-    search = "trump"
+    search1 = "trump"
+    search2 = "biden"
+    search1_kr = "트럼프"
+    search2_kr = "바이든"
     start_date = "20201114"
     end_date = "20210113"
-    # 크롤러 객체 생성
-    wp_crawler = WPCrawler(driver_url, chrome_options)
 
-    # wp_crawler.crawlLinks(search, start_date, end_date) # 링크 크롤링(selenium)
-    wp_crawler.crawlNews(search, start_date, end_date) # 뉴스 크롤링(async+grequest+bs4)
+    if wp_crawl_run:
+        # 크롤러 객체 생성
+        wp_crawler = WPCrawler(driver_url, chrome_options)
 
-    dic = {}
+        # wp_crawler.crawlLinks(search1, start_date, end_date) # 링크 크롤링(selenium)
+        wp_crawler.crawlNews(search1, start_date, end_date) # 뉴스 크롤링(async+grequest+bs4)
 
-    with open(f'result/washingtonpost/news_{search}.json','r', encoding='utf8') as f:
-        dic = json.load(f)
-        
-    result_dic = translateTitle(search, driver_url, chrome_options, dic) # 구글 번역(selenium)
+        dic = {}
 
-    with open(f'result/washingtonpost/news_trans_{search}.json', 'w', encoding='utf8') as f:
-        json.dump(result_dic, f, indent=4, sort_keys=True, ensure_ascii=False)
+        with open(f'result/washingtonpost/news_{search1}.json','r', encoding='utf8') as f:
+            dic = json.load(f)
+            
+        result_dic = translateTitle(search1, driver_url, chrome_options, dic) # 구글 번역(selenium)
 
-    exit()
+        with open(f'result/washingtonpost/news_trans_{search1}.json', 'w', encoding='utf8') as f:
+            json.dump(result_dic, f, indent=4, sort_keys=True, ensure_ascii=False)
+            
 
-    # 최신 빅카인즈 + 동적 크롤러 (국내 언론)
+            
+        wp_crawler.crawlLinks(search2, start_date, end_date) # 링크 크롤링(selenium)
+        wp_crawler.crawlNews(search2, start_date, end_date) # 뉴스 크롤링(async+grequest+bs4)
+
+        dic = {}
+
+        with open(f'result/washingtonpost/news_{search2}.json','r', encoding='utf8') as f:
+            dic = json.load(f)
+            
+        result_dic = translateTitle(search2, driver_url, chrome_options, dic) # 구글 번역(selenium)
+
+        with open(f'result/washingtonpost/news_trans_{search2}.json', 'w', encoding='utf8') as f:
+            json.dump(result_dic, f, indent=4, sort_keys=True, ensure_ascii=False)
+
+
+
+
+    if nt_crawl_run:
+        # 크롤러 객체 생성
+        nt_crawler = NTCrawler(driver_url, chrome_options)
+
+        nt_crawler.crawlLinks(search1, start_date, end_date) # 링크 크롤링(selenium)
+        nt_crawler.crawlNews(search1, start_date, end_date) # 뉴스 크롤링(async+grequest+bs4)
+
+        dic = {}
+
+        with open(f'result/newyorktimes/news_{search1}.json','r', encoding='utf8') as f:
+            dic = json.load(f)
+            
+        result_dic = translateTitle(search1, driver_url, chrome_options, dic) # 구글 번역(selenium)
+
+        with open(f'result/newyorktimes/news_trans_{search1}.json', 'w', encoding='utf8') as f:
+            json.dump(result_dic, f, indent=4, sort_keys=True, ensure_ascii=False)
+            
+            
+        nt_crawler.crawlLinks(search2, start_date, end_date) # 링크 크롤링(selenium)
+        nt_crawler.crawlNews(search2, start_date, end_date) # 뉴스 크롤링(async+grequest+bs4)
+
+        dic = {}
+
+        with open(f'result/newyorktimes/news_{search2}.json','r', encoding='utf8') as f:
+            dic = json.load(f)
+            
+        result_dic = translateTitle(search2, driver_url, chrome_options, dic) # 구글 번역(selenium)
+
+        with open(f'result/newyorktimes/news_trans_{search2}.json', 'w', encoding='utf8') as f:
+            json.dump(result_dic, f, indent=4, sort_keys=True, ensure_ascii=False)
+
+
+
     if kr_crawl_run:
-        search = "트럼프"
-        start_date = "2020-11-14"
-        end_date = "2021-01-13"
+        # # 최신 빅카인즈 + 동적 크롤러 (국내 언론)
 
-        start = time.time()
-        KrCrawler2.crawl(search, start_date, end_date)
-        end = time.time()
-        a = {}
-        with open('kr_news_%s.json'%search, 'r', encoding='utf8') as f:
-            a = json.load(f)
-        print(f'크롤링 개수: {len(a)} time taken: {end-start}')
-
-
-        ''' 구데기 다음 크롤러 + 비동적 크롤러 제한도있음;
-        # 크롤러 객체 생성
-        # kr_news_crawler_t = KrCrawler.KrCrawler('', driver_url, chrome_options, 'naver')
-        # kr_news_crawler_t.crawlLinks('트럼프') # 링크 크롤링(selenium)
-        # kr_news_crawler_t.crawlNews('트럼프') # 뉴스 크롤링(requests+bs4)
-
-        # 크롤러 객체 생성
-        # kr_news_crawler_b = KrCrawler.KrCrawler('', driver_url, chrome_options, 'naver')
-        # kr_news_crawler_b.crawlLinks('바이든') # 링크 크롤링(selenium)
-        # kr_news_crawler_b.crawlNews('바이든') # 뉴스 크롤링(requests+bs4)
-        '''
-
+        BigKindsCrawler.crawl(search1_kr, start_date, end_date)
+        BigKindsCrawler.crawl(search2_kr, start_date, end_date)
 
     # 크롤링하여 저장된 json을 불러와서 이분그래프 생성
 
@@ -306,17 +338,23 @@ if __name__ == "__main__":
     trump_us = {}
     biden_us = {}
 
-    with open('kr_news_트럼프.json', 'r', encoding='utf8') as f:
+    with open('result/bigkinds/news_트럼프.json', 'r', encoding='utf8') as f:
         trump_kr = json.load(f)
         
-    with open('kr_news_바이든.json', 'r', encoding='utf8') as f:
+    with open('result/bigkinds/news_바이든.json', 'r', encoding='utf8') as f:
         biden_kr = json.load(f)
         
-    with open(f'{us_platform}_news_trans_trump.json', 'r', encoding='utf8') as f:
+    with open(f'result/washingtonpost/news_trans_trump.json', 'r', encoding='utf8') as f:
         trump_us = json.load(f)
         
-    with open(f'{us_platform}_news_trans_biden.json', 'r', encoding='utf8') as f:
+    with open(f'result/washingtonpost/news_trans_biden.json', 'r', encoding='utf8') as f:
         biden_us = json.load(f)
+        
+    # with open(f'result/newyorktimes/news_trans_trump.json', 'r', encoding='utf8') as f:
+    #     trump_us = json.load(f)
+        
+    # with open(f'result/newyorktimes/news_trans_biden.json', 'r', encoding='utf8') as f:
+    #     biden_us = json.load(f)
 
     print(f'trump: {len(trump_us)}')
     print(f'biden: {len(biden_us)}')

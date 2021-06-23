@@ -1,0 +1,38 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  Internal Error (t:/workspace/open/src/hotspot/os_cpu/windows_x86/os_windows_x86.cpp:145), pid=37536, tid=1392
+#  guarantee(result == EXCEPTION_CONTINUE_EXECUTION) failed: Unexpected result from topLevelExceptionFilter
+#
+# JRE version: Java(TM) SE Runtime Environment (14.0+36) (build 14+36-1461)
+# Java VM: Java HotSpot(TM) 64-Bit Server VM (14+36-1461, mixed mode, sharing, tiered, compressed oops, g1 gc, windows-amd64)
+# No core dump will be written. Minidumps are not enabled by default on client versions of Windows
+#
+# If you would like to submit a bug report, please visit:
+#   https://bugreport.java.com/bugreport/crash.jsp
+# The crash happened outside the Java Virtual Machine in native code.
+# See problematic frame for where to report the bug.
+#
+
+---------------  S U M M A R Y ------------
+
+Command Line: -Dfile.encoding=UTF8 -ea -Xmx1024m 
+
+Host: Intel(R) Core(TM) i5-6500 CPU @ 3.20GHz, 4 cores, 7G,  Windows 10 , 64 bit Build 19041 (10.0.19041.1023)
+Time: Thu Jun 24 01:36:54 2021 대한민국 표준시 elapsed time: 323 seconds (0d 0h 5m 23s)
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x0000024217a54000):  JavaThread "Python Reference Queue" daemon [_thread_in_native, id=1392, stack(0x0000006a05270000,0x0000006a05460000)]
+
+Stack: [0x0000006a05270000,0x0000006a05460000]
+Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+V  [jvm.dll+0x5f83ea]
+V  [jvm.dll+0x741e2a]
+V  [jvm.dll+0x7435df]
+V  [jvm.dll+0x743bd7]
+V  [jvm.dll+0x20d1ec]
+V  [jvm.dll+0x5f80ac]
+C  [ntdll.dll+0xa217f]
+C  [ntdll.dll+0x51454]
+C  [ntdll.dll+0xa0cae]

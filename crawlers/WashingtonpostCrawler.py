@@ -3,7 +3,7 @@
 # Web crawling program for https://washingtonpost.com
 # Author : Ji-yong219
 # Project Start:: 2020.12.18
-# Last Modified from Ji-yong 2021.06.22
+# Last Modified from Ji-yong 2021.06.23
 #
 
 from selenium import webdriver
@@ -25,7 +25,6 @@ from utils.FeedbackCounter import FeedbackCounter
 from crawlers.BaseCrawler import Crawler
 
 class WPCrawler(Crawler):
-    news_agency = None
     chrome_options = None
     driver = None
     url_num = 0
@@ -73,7 +72,8 @@ class WPCrawler(Crawler):
             div, news = None, None
 
             div = self.driver.find_element_by_xpath('//*[@id="main-content"]/div/div/div[2]/div')
-            news = div.find_elements_by_tag_name('a')
+            # news = div.find_elements_by_tag_name('a')
+            news = div.find_elements_by_css_selector('div[data-ng-repeat="doc in vm.results.documents"]')
 
             if len(news)<20:
                 break
@@ -84,36 +84,44 @@ class WPCrawler(Crawler):
             for i in range(len(news)):
                 link = None
 
-                if search in news[i].text.lower():
-                    link = news[i].get_attribute('href')
+                link = news[i].get_attribute('data-sid')
 
-                if link is None:
+                # if search in news[i].text_lower():
+                # if search in news[i].get_attribute('data-sid'):
+                    # link = news[i].get_attribute('href')
+                    # link = news[i].get_attribute('data-sid')
+
+                if link is None or link == "":
                     continue
 
                 link = link.replace('\n', '')
-                if link and link[:30] == "https://www.washingtonpost.com" and link not in self.news_queue:
+                if link.startswith("www.washingtonpost.com") and link not in self.news_queue:
                     print(f'link : {link}')
                     try:
                         index_ = link.index(f"/20")+1
-                        date_ = link[index_:index_+10].replace('/', '')
-                        date_ = datetime.date(int(date_[:4]), int(date_[4:6]), int(date_[6:]))
-                        start_date_ = datetime.date(int(start_date[:4]), int(start_date[4:6]), int(start_date[6:]))
-                        end_date_ = datetime.date(int(end_date[:4]), int(end_date[4:6]), int(end_date[6:]))
-                        print(f'date_:{date_}\t\tstart_date_:{start_date_}\t\tend_date_:{end_date_}')
+                        # date = link[index_:index_+10].replace('/', '')
+                        date = news[i].find_element_by_css_selector('span[class="pb-timestamp ng-binding"]')
+                        date = convert_date(date.text + " at 04:00 a.m. GMT+9")
+                        date_ = datetime.date(int(date_[:4]), int(date_[4:6]), int(date_[6:8]))
+                        start_date_ = datetime.date(int(start_date[:4]), int(start_date[4:6]), int(start_date[6:8]))
+                        end_date_ = datetime.date(int(end_date[:4]), int(end_date[4:6]), int(end_date[6:8]))
 
-                    except ValueError:
-                        print("value Error", link)
+                    except ValueError as e:
+                        print("value Error", e, link)
                         pass
 
                     else:
                         if start_date_ <= date_ and date_ <= end_date_:
+                            # print(f'if\tdate_:{date_}\t\tstart_date_ : {start_date_}\t\tend_date_:{end_date_}')
                             self.news_queue.append(link)
 
                         elif date_ < start_date_:
+                            # print(f'elif\tdate_:{date_}\t\tstart_date_ : {start_date_}\t\tend_date_:{end_date_}')
                             is_end = True
 
                         else:
-                            self.url_num += (date_ - end_date_).days*10
+                            # print(f'else\tdate_:{date_}\t\tstart_date_ : {start_date_}\t\tend_date_:{end_date_}')
+                            self.url_num += (date_ - end_date_).days
 
             self.url_num += 20
 
@@ -133,21 +141,21 @@ class WPCrawler(Crawler):
 
         headers = {'User-Agent':'Mozilla/5.0'}
         
-        rs = (grequests.get(self.news_queue[i], headers=headers, callback=fbc.feedback) for i in trange(len(self.news_queue), file=sys.stdout, desc='get Grequest'))
+        rs = (grequests.get("https://"+self.news_queue[i], headers=headers, callback=fbc.feedback) for i in trange(len(self.news_queue), file=sys.stdout, desc='get Grequest'))
         a = grequests.map(rs)
         
         self.soup_list = [ (a[i].url,bs(a[i].content, 'html.parser')) for i in trange(len(a), file=sys.stdout, desc='get html parser from bs4') if a[i] is not None]
 
-        print(f'self.soup_list : {len(self.soup_list)}')
-
         for idx, soup in enumerate(self.soup_list):
+            print(f"idx : {idx}")
             if soup is None or len(soup)<2:
+                print("soup 없어서 continue111")
                 continue
 
             url, soup = soup
 
             if soup is None:
-                print("soup 없어서 continue")
+                print("soup 없어서 continue222")
                 continue
 
             title = self.getTitle(soup)
@@ -162,11 +170,12 @@ class WPCrawler(Crawler):
             author = self.getAuthor(soup)
             if author and author != "":
                 # print("기자 : ", author[0].get_text())
+                author = author[0].get_text()
                 pass
             
             else:
                 author = "No-Author"
-                print("기자 없어서 continue\t->", url)
+                # print("기자 없어서 continue\t->", url)
                 # continue
                 
                 
@@ -190,7 +199,9 @@ class WPCrawler(Crawler):
                         check_date = True
                         break
                         
-                if check_date: continue
+                if not check_date:
+                    # print(f"범위에 없는 날짜라 continue?? {str(date)[:8]}")
+                    continue
                     
             else:
                 print("date 없어서 continue")
@@ -207,10 +218,11 @@ class WPCrawler(Crawler):
 
             self.temp_data[url] = {
                 'title':title[0].get_text(),
-                'author':author[0].get_text(),
+                'author':author,
                 'date':date,
                 'article':article[0].get_text()
             }
+            print(f"{idx},  추가, 길이:{len(self.temp_data)}")
         
         print("다 긁은 개수 : ", len(self.temp_data))
         

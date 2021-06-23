@@ -60,7 +60,8 @@ def translateTitle(search, driver_url, chrome_options, dic):
             
         data = result.get()
         
-        dic.update(data)
+        # result_dic.update(data)
+        result_dic[data[0]]['title'] = data[1]
     
     return result_dic.copy()
 
@@ -106,7 +107,8 @@ def translate_title_process(idx, total_length, driver_url, chrome_options, title
         temp = {}
         temp[url] = {}
         temp[url]['title'] = after_trans
-        result.put(temp)
+        # result.put(temp)
+        result.put((url, after_trans))
         left_field.clear()
         print('\n')
         
