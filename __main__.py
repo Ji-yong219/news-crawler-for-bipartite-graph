@@ -241,7 +241,7 @@ if __name__ == "__main__":
     driver_url = 'D:\\chromedriver.exe'
 
     chrome_options = webdriver.ChromeOptions()
-    # chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--headless')
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--privileged')
     chrome_options.add_argument('--incognito')
@@ -261,7 +261,7 @@ if __name__ == "__main__":
         # 크롤러 객체 생성
         wp_crawler = WPCrawler(driver_url, chrome_options)
 
-        # wp_crawler.crawlLinks(search1, start_date, end_date) # 링크 크롤링(selenium)
+        wp_crawler.crawlLinks(search1, start_date, end_date) # 링크 크롤링(selenium)
         wp_crawler.crawlNews(search1, start_date, end_date) # 뉴스 크롤링(async+grequest+bs4)
 
         dic = {}

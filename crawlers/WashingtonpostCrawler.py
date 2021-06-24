@@ -102,7 +102,7 @@ class WPCrawler(Crawler):
                         # date = link[index_:index_+10].replace('/', '')
                         date = news[i].find_element_by_css_selector('span[class="pb-timestamp ng-binding"]')
                         date = convert_date(date.text + " at 04:00 a.m. GMT+9")
-                        date_ = datetime.date(int(date_[:4]), int(date_[4:6]), int(date_[6:8]))
+                        date_ = datetime.date(int(date[:4]), int(date[4:6]), int(date[6:8]))
                         start_date_ = datetime.date(int(start_date[:4]), int(start_date[4:6]), int(start_date[6:8]))
                         end_date_ = datetime.date(int(end_date[:4]), int(end_date[4:6]), int(end_date[6:8]))
 
