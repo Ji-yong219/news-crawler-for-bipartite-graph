@@ -4,10 +4,10 @@ curious_george.patch_all(thread=False, select=False)
 import time
 from selenium import webdriver
 
-from konlpy.tag import Hannanum
+# from konlpy.tag import Hannanum
 from eunjeon import Mecab
 
-han = Hannanum()#han.nouns(text)
+# han = Hannanum()#han.nouns(text)
 mcb = Mecab()
 morphology_analyzer = mcb
 
@@ -16,11 +16,12 @@ from crawlers.NewyorktimesCrawler import NTCrawler
 from crawlers import BigKindsCrawler
 
 from utils.Translator import translateTitle
-# import KrCrawler
-# import KrCrawler2
-# from Translator import Translator
+
+from utils.util import *
+
+
 import json
-from datetime import datetime
+from datetime import datetime, date
 from collections import Counter
 
 import networkx as nx
@@ -28,7 +29,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from pandas import DataFrame as df
 import numpy as np
-
+ 
 import numba
 from tqdm import trange
 
@@ -39,7 +40,7 @@ import nltk, re
 nltk.download('punkt')
 
 import matplotlib.font_manager as fm 
-font_path = 'C:/Users/JY/AppData/Local/Microsoft/Windows/Fonts/BMJUA_ttf.ttf' 
+font_path = 'C:/Users/user/AppData/Local/Microsoft/Windows/Fonts/BMJUA_ttf.ttf' 
 fontprop = fm.FontProperties(fname=font_path, size=24) 
 plt.rcParams['font.family'] = 'NanumGothic'
 
@@ -48,72 +49,58 @@ plt.rcParams['font.family'] = 'NanumGothic'
 
 # @numba.jit(forceobj=True)
 def make_bipartite_graph(news_us, news_kr, day, noun):
-    us_title = []
-    kr_title = []
+    us_data_list = []
+    kr_data_list = []
     result = {}
     
     #---------------------------- title 
-    temp_us = list(news_us.keys())
-    for url in temp_us:
-        us_title.append([url, news_us.get(url).get('title'), news_us.get(url).get('date')])
+    for url in list(news_us.keys()):
+        us_data_list.append([url, morphology_analyzer.nouns( news_us.get(url).get('title') ), news_us.get(url).get('date')])
 
-    temp_kr = list(news_kr.keys())
-    for url in temp_kr:
-        kr_title.append([url, news_kr.get(url).get('title'), news_kr.get(url).get('date')])
+    for url in list(news_kr.keys()):
+        kr_data_list.append([url, morphology_analyzer.nouns( news_kr.get(url).get('title') ), news_kr.get(url).get('date')])
     #----------------------------
 
-    #---------------------------- 형태소 분석
-    for i in range(len(us_title)):
-        us_title[i][1] = morphology_analyzer.nouns(us_title[i][1])
-    
-    for i in range(len(kr_title)):
-        kr_title[i][1] = morphology_analyzer.nouns(kr_title[i][1])
-    #----------------------------
-
-    #----------------------------
     temp = []
 
-    c = 0
-
-
-    for idx in trange(len(us_title), file=sys.stdout, desc='make bipartite graph'):
-    # for idx in range(len(us_title)):
-        i = us_title[idx]
+    for idx in trange(len(us_data_list), file=sys.stdout, desc='make bipartite graph'):
+    # for idx in range(len(us_data_list)):
+        us_url, us_title, us_date = us_data_list[idx]
         
-        for j in kr_title:
+        for kr_data in kr_data_list:
+            kr_url, kr_title, kr_date = kr_data
+
             count = 0
 
             # 년도+월+일+시+분
-            time_us = datetime(int(i[2][0:4]), int(i[2][4:6]), int(i[2][6:8]), int(i[2][8:10]), int(i[2][10:12]))
-            time_kr = datetime(int(j[2][0:4]), int(j[2][4:6]), int(j[2][6:8]), int(j[2][8:10]), int(j[2][10:12]))
+            time_us = datetime(int(us_date[0:4]), int(us_date[4:6]), int(us_date[6:8]), int(us_date[8:10]), int(us_date[10:12]))
+            time_kr = datetime(int(kr_date[0:4]), int(kr_date[4:6]), int(kr_date[6:8]), int(kr_date[8:10]), int(kr_date[10:12]))
             
+
             # 국내기사 제목 명사 수만큼 반복
-            for k in range(len(j[1])):
+            for k in range(len(kr_title)):
                 # 해외기사가 나오고 국내기사 나오기까지 기간 밖일 경우 예외
                 if abs((time_kr - time_us).days) > day:
                     break
                 
                 # 같은 명사가 있을 경우 count 증가
-                if j[1][k] in j[1]:
+                if kr_title[k] in us_title:
                     count += 1
 
 
             # 명사 수가 기준 이상일 경우 연관 지음
             if count >= noun:
-                temp.append([i[0], j[0]])
-                kr_title.remove(j) # 중복 제거를 위해 해당 국내기사 제거
-                
-        c+=1
-        # print(f'이분그래프 노드 생성 {c}개 / {len(us_title)} 완료   kr: {len(kr_title)}')
+                temp.append([us_url, kr_url])
+                kr_data_list.remove(kr_data) # 중복 제거를 위해 해당 국내기사 제거
 
     temp2 = []
     #----------------------------
     
-    for i in temp:
-        if len(temp2) == 0 or i[0] != temp2[-1][0]:
-            temp2.append(i)
+    for us_url, kr_url in temp:
+        if len(temp2) == 0 or us_url != temp2[-1][0]:
+            temp2.append([us_url])
         else:
-            temp2[-1].append(i[1])
+            temp2[-1].append(kr_url)
             
             
     for i in temp2:
@@ -222,12 +209,12 @@ def get_clean_words(text, stopwords):
 
 
 if __name__ == "__main__":
-    wp_crawl_run = True
+    wp_crawl_run = False
     nt_crawl_run = False
     kr_crawl_run = False
-    make_bipartite_img = False
+    make_bipartite_img = True
 
-    task1_1_run = False # 연관 빈도수 그래프
+    task1_1_run = True # 연관 빈도수 그래프
     task1_2_run = False # 히트 알고리즘
     task2_run = False # 외국기사 나오고 한국기사 날짜
     task3_run = False
@@ -238,10 +225,10 @@ if __name__ == "__main__":
 
 
     # 크롬 드라이버 링크
-    driver_url = 'D:\\chromedriver.exe'
+    driver_url = 'C:\\chromedriver.exe'
 
     chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument('--headless')
+    #chrome_options.add_argument('--headless')
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--privileged')
     chrome_options.add_argument('--incognito')
@@ -254,8 +241,8 @@ if __name__ == "__main__":
     search2 = "biden"
     search1_kr = "트럼프"
     search2_kr = "바이든"
-    start_date = "20201114"
-    end_date = "20210113"
+    start_date = "20201103"
+    end_date = "20210120" # 1일 더해야함
 
     if wp_crawl_run:
         # 크롤러 객체 생성
@@ -344,17 +331,17 @@ if __name__ == "__main__":
     with open('result/bigkinds/news_바이든.json', 'r', encoding='utf8') as f:
         biden_kr = json.load(f)
         
-    with open(f'result/washingtonpost/news_trans_trump.json', 'r', encoding='utf8') as f:
-        trump_us = json.load(f)
-        
-    with open(f'result/washingtonpost/news_trans_biden.json', 'r', encoding='utf8') as f:
-        biden_us = json.load(f)
-        
-    # with open(f'result/newyorktimes/news_trans_trump.json', 'r', encoding='utf8') as f:
+    # with open(f'result/washingtonpost/news_trans_trump.json', 'r', encoding='utf8') as f:
     #     trump_us = json.load(f)
         
-    # with open(f'result/newyorktimes/news_trans_biden.json', 'r', encoding='utf8') as f:
+    # with open(f'result/washingtonpost/news_trans_biden.json', 'r', encoding='utf8') as f:
     #     biden_us = json.load(f)
+        
+    with open(f'result/newyorktimes/news_trans_trump.json', 'r', encoding='utf8') as f:
+        trump_us = json.load(f)
+        
+    with open(f'result/newyorktimes/news_trans_biden.json', 'r', encoding='utf8') as f:
+        biden_us = json.load(f)
 
     print(f'trump: {len(trump_us)}')
     print(f'biden: {len(biden_us)}')
@@ -390,7 +377,7 @@ if __name__ == "__main__":
         if mode == 1:
             first_partition_nodes = list(dic.keys())
             # larger figure size
-            plt.figure(1, figsize=(50,50)) 
+            plt.figure(1, figsize=(50, 50)) 
 
             nx.draw_networkx(
                 cbg,
@@ -401,7 +388,7 @@ if __name__ == "__main__":
                 width = 1) # Or whatever other display options you like
 
             plt.show()
-            plt.savefig(f"{us_platform}_graph.png") # Save to a PNG file
+            # plt.savefig(f"{us_platform}_graph.png") # Save to a PNG file
 
         elif mode == 2:
             first_partition_nodes = list(dic_t.keys())
@@ -416,8 +403,8 @@ if __name__ == "__main__":
                 pos = nx.drawing.layout.bipartite_layout(cbg_t, first_partition_nodes), 
                 width = 1) # Or whatever other display options you like
 
-            # plt.show()
-            plt.savefig("graph_t.png") # Save to a PNG file
+            plt.show()
+            # plt.savefig("graph_t.png") # Save to a PNG file
 
             first_partition_nodes = list(dic_b.keys())
             # larger figure size
@@ -433,7 +420,7 @@ if __name__ == "__main__":
 
             plt.show()
             # plt.savefig("graph_b.png") # Save to a PNG file
-            plt.savefig(f"{us_platform}_bipartite_graph.png") # Save to a PNG file
+            # plt.savefig(f"{us_platform}_bipartite_graph.png") # Save to a PNG file
 
 
 
@@ -453,7 +440,6 @@ if __name__ == "__main__":
         normalized = []
         
         for value in lst:
-            # normalized_num = (value - min(lst)) / (max(lst) - min(lst))
             normalized_num = ((value - min_) / (max_ - min_))
             normalized_num = round(normalized_num, 2)
             normalized.append(normalized_num)
@@ -468,29 +454,27 @@ if __name__ == "__main__":
         bar_mode = False
         normalize_mode = True
 
-
         task1_1_trump = {}
-        temp = sorted( dic_t.items(), reverse=False, key=( lambda i : int(trump_us[i[0]]['date']) ) )
 
+        temp = sorted( dic_t.items(), reverse=False, key=( lambda i : int(trump_us[i[0]]['date']) ) )
         for k, v in temp:
-            date = trump_us[k]['date'][:8]
-            if date in task1_1_trump.keys():
-                task1_1_trump[date] = {'val':( round(task1_1_trump.get(date).get('val')+len(v) / 2, 1))}
+            date_ = trump_us[k]['date'][:8]
+            if date_ in task1_1_trump.keys():
+                task1_1_trump[date_] = {'val':( round(task1_1_trump.get(date_).get('val')+len(v) / 2, 1))}
 
             else:
-                task1_1_trump[date] = {'val':len(v)}
-
+                task1_1_trump[date_] = {'val':len(v)}
 
         task1_1_biden = {}
         temp = sorted( dic_b.items(), reverse=False, key=( lambda i : int(biden_us[i[0]]['date']) ) )
 
         for k, v in temp:
-            date = biden_us[k]['date'][:8]
-            if date in task1_1_biden.keys():
-                task1_1_biden[date] = {'val':( round(task1_1_biden.get(date).get('val')+len(v) / 2, 1))}
+            date_ = biden_us[k]['date'][:8]
+            if date_ in task1_1_biden.keys():
+                task1_1_biden[date_] = {'val':( round(task1_1_biden.get(date_).get('val')+len(v) / 2, 1))}
 
             else:
-                task1_1_biden[date] = {'val':len(v)}
+                task1_1_biden[date_] = {'val':len(v)}
 
 
         t_day = list(task1_1_trump.keys())
@@ -525,8 +509,20 @@ if __name__ == "__main__":
             b_n = min_max_normalize(b_n, max_, min_)
 
 
+
+         
         all_day = list(set(t_day+b_day))
+        # all_day = list()
+
+        # start_date_ = date(int(start_date[:4]), int(start_date[4:6]), int(start_date[6:]))
+        # end_date_ = date(int(end_date[:4]), int(end_date[4:6]), int(end_date[6:]))
+
+        # for single_date in daterange(start_date_, end_date_):
+        #     all_day.append( single_date.strftime("%m.%d") )
+            
         all_day.sort()
+
+        # print(f'all_day : {all_day}')
 
         labels = [f'{i[4:6]}.{i[6:]}' for i in all_day]
         x = np.arange(len(labels))  # the label locations
@@ -592,7 +588,7 @@ if __name__ == "__main__":
             plt.fill_between(labels, b_n, t_n, where=z2>z1, color='blue', interpolate=True)
 
         plt.show()
-        plt.savefig(f"{us_platform}_task1-1.png") # Save to a PNG file
+        # plt.savefig(f"{us_platform}_task1-1.png") # Save to a PNG file
         print('Task1-1 종료')
     # 
 
@@ -690,7 +686,7 @@ if __name__ == "__main__":
                 plt.text(v, t_n[i]+h, t_n[i], fontsize = 8, color='black')
 
         # plt.tight_layout()
-        plt.savefig(f'{us_platform}_Task2.png')
+        # plt.savefig(f'{us_platform}_Task2.png')
 
         plt.show()
         print('Task2 종료')
@@ -737,7 +733,7 @@ if __name__ == "__main__":
         autolabel(rects)
 
         # plt.tight_layout()
-        plt.savefig(f'{us_platform}_Task3.png')
+        # plt.savefig(f'{us_platform}_Task3.png')
         plt.show()
         print('Task3 종료')
 

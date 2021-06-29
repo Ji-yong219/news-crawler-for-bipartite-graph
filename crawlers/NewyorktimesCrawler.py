@@ -53,8 +53,8 @@ class NTCrawler(Crawler):
         self.news_queue = []
         self.driver = webdriver.Chrome(self.driver_url, chrome_options=self.chrome_options)
         self.url_num = 0
-        start_date_ = datetime.date(int(start_date[:4]), int(start_date[4:6]), int(start_date[6:]))
-        end_date_ = datetime.date(int(end_date[:4]), int(end_date[4:6]), int(end_date[6:]))
+        start_date_ = datetime.date(int(start_date[:4]), int(start_date[4:6]), int(start_date[6:])) + datetime.timedelta(days=1)
+        end_date_ = datetime.date(int(end_date[:4]), int(end_date[4:6]), int(end_date[6:])) + datetime.timedelta(days=1)
         
         while True:
             news = None
@@ -62,7 +62,7 @@ class NTCrawler(Crawler):
             for single_date in daterange(start_date_, end_date_):
                 this_date = single_date.strftime("%Y%m%d")
                 self.url = f"https://www.nytimes.com/search?dropmab=true&startDate={this_date}&endDate={this_date}&query={search}&sort=oldest&types=article"
-                print(f'{this_date} 하는 중', end='\t→\t')
+                print(f'{this_date} 하는 중 {self.url}', end='\t→\t')
 
                 while True:
                     self.driver.get(self.url)

@@ -1,0 +1,65 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  EXCEPTION_UNCAUGHT_CXX_EXCEPTION (0xe06d7363) at pc=0x00007fff2f394b89, pid=15148, tid=14276
+#
+# JRE version: Java(TM) SE Runtime Environment (15.0.1+9) (build 15.0.1+9-18)
+# Java VM: Java HotSpot(TM) 64-Bit Server VM (15.0.1+9-18, mixed mode, sharing, tiered, compressed oops, g1 gc, windows-amd64)
+# Problematic frame:
+# C  [KERNELBASE.dll+0x34b89]
+#
+# No core dump will be written. Minidumps are not enabled by default on client versions of Windows
+#
+# If you would like to submit a bug report, please visit:
+#   https://bugreport.java.com/bugreport/crash.jsp
+# The crash happened outside the Java Virtual Machine in native code.
+# See problematic frame for where to report the bug.
+#
+
+---------------  S U M M A R Y ------------
+
+Command Line: -Dfile.encoding=UTF8 -ea -Xmx1024m 
+
+Host: Intel(R) Core(TM) i5-8400 CPU @ 2.80GHz, 6 cores, 31G,  Windows 10 , 64 bit Build 19041 (10.0.19041.928)
+Time: Sun Jun 27 23:22:33 2021 대한민국 표준시 elapsed time: 0.428145 seconds (0d 0h 0m 0s)
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x000001fb1410e010):  JavaThread "main" [_thread_in_native, id=14276, stack(0x000000b268800000,0x000000b2689f0000)]
+
+Stack: [0x000000b268800000,0x000000b2689f0000],  sp=0x000000b2689ec8a0,  free space=1970k
+Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+C  [KERNELBASE.dll+0x34b89]
+C  [VCRUNTIME140.dll+0x6220]
+C  [_jpype.cp38-win_amd64.pyd+0x45047]  JPPyObject::call+0x127  (jp_pythontypes.cpp:95)
+C  [_jpype.cp38-win_amd64.pyd+0x4df35]  PyJPClass_hook+0x5c5  (pyjp_class.cpp:1198)
+C  [_jpype.cp38-win_amd64.pyd+0x42a75]  Java_org_jpype_manager_TypeFactoryNative_newWrapper+0x65  (jp_typefactory.cpp:100)
+C  0x000001fb1cb5f177
+
+Java frames: (J=compiled Java code, j=interpreted, Vv=VM code)
+j  org.jpype.manager.TypeFactoryNative.newWrapper(JJ)V+0
+j  org.jpype.JPypeContext.newWrapper(J)V+16
+v  ~StubRoutines::call_stub
+
+siginfo: EXCEPTION_UNCAUGHT_CXX_EXCEPTION (0xe06d7363), ExceptionInformation=0x0000000019930520 0x000000b2689eca60 0x00007fff04e92a60 0x00007fff04e00000 
+
+
+Register to memory mapping:
+
+RIP=0x00007fff2f394b89 KERNELBASE.dll
+RAX=0x000001fb13a94f40 points into unknown readable memory: 0x0000000000000001 | 01 00 00 00 00 00 00 00
+RBX=0x00007fff04e92a60 _jpype.cp38-win_amd64.pyd::_TI1?AVJPypeException@@ + 0x0
+RCX=0x0 is NULL
+RDX=0x000000000000000f is an unknown value
+RSP=0x000000b2689ec8a0 is pointing into the stack for thread: 0x000001fb1410e010
+RBP=0x000000b2689ecb59 is pointing into the stack for thread: 0x000001fb1410e010
+RSI=0x000000b2689eca60 is pointing into the stack for thread: 0x000001fb1410e010
+RDI=0x0000000019930520 is an unknown value
+R8 =0x00007fff04e469d2 _jpype.cp38-win_amd64.pyd::PyJPArray_len + 0x52
+R9 =0x0 is NULL
+R10=0x000001fb1410e010 is a thread
+R11=0x000001fb1410e010 is a thread
+R12=0x000000b2689ecbe8 is pointing into the stack for thread: 0x000001fb1410e010
+R13=0x000001fb10803400 points into unknown readable memory: 0x00007fff04e74868 | 68 48 e7 04 ff 7f 00 00
+R14=0x000001fb149b2500 points into unknown readable memory: 0x0000000000000001 | 01 00 00 00 00 00 00 00
+R15=

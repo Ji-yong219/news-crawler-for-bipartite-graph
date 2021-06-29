@@ -86,11 +86,6 @@ class WPCrawler(Crawler):
 
                 link = news[i].get_attribute('data-sid')
 
-                # if search in news[i].text_lower():
-                # if search in news[i].get_attribute('data-sid'):
-                    # link = news[i].get_attribute('href')
-                    # link = news[i].get_attribute('data-sid')
-
                 if link is None or link == "":
                     continue
 
@@ -112,15 +107,12 @@ class WPCrawler(Crawler):
 
                     else:
                         if start_date_ <= date_ and date_ <= end_date_:
-                            # print(f'if\tdate_:{date_}\t\tstart_date_ : {start_date_}\t\tend_date_:{end_date_}')
                             self.news_queue.append(link)
 
                         elif date_ < start_date_:
-                            # print(f'elif\tdate_:{date_}\t\tstart_date_ : {start_date_}\t\tend_date_:{end_date_}')
                             is_end = True
 
                         else:
-                            # print(f'else\tdate_:{date_}\t\tstart_date_ : {start_date_}\t\tend_date_:{end_date_}')
                             self.url_num += (date_ - end_date_).days
 
             self.url_num += 20
