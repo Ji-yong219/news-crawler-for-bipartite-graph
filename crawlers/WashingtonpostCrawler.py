@@ -90,7 +90,8 @@ class WPCrawler(Crawler):
                     continue
 
                 link = link.replace('\n', '')
-                if link.startswith("www.washingtonpost.com") and link not in self.news_queue:
+                if link.startswith("www.washingtonpost.com") and ".com/video/" not in link and link not in self.news_queue:
+
                     print(f'link : {link}')
                     try:
                         index_ = link.index(f"/20")+1
@@ -136,10 +137,16 @@ class WPCrawler(Crawler):
         rs = (grequests.get("https://"+self.news_queue[i], headers=headers, callback=fbc.feedback) for i in trange(len(self.news_queue), file=sys.stdout, desc='get Grequest'))
         a = grequests.map(rs)
         
-        self.soup_list = [ (a[i].url,bs(a[i].content, 'html.parser')) for i in trange(len(a), file=sys.stdout, desc='get html parser from bs4') if a[i] is not None]
+        # self.soup_list = [ (a[i].url,bs(a[i].content, 'html.parser')) for i in trange(len(a), file=sys.stdout, desc='get html parser from bs4') if a[i] is not None]
 
-        for idx, soup in enumerate(self.soup_list):
-            print(f"idx : {idx}")
+        for i in trange(len(a), file=sys.stdout, desc='get html parser from bs4'):
+        # for idx, soup in enumerate(self.soup_list):
+            soup = None
+
+            if a[i] is not None:
+                soup = (a[i].url,bs(a[i].content, 'html.parser'))
+
+            # print(f"idx : {idx}")
             if soup is None or len(soup)<2:
                 print("soup 없어서 continue111")
                 continue
@@ -214,7 +221,6 @@ class WPCrawler(Crawler):
                 'date':date,
                 'article':article[0].get_text()
             }
-            print(f"{idx},  추가, 길이:{len(self.temp_data)}")
         
         print("다 긁은 개수 : ", len(self.temp_data))
         

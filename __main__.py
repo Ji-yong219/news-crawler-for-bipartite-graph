@@ -212,7 +212,7 @@ if __name__ == "__main__":
     wp_crawl_run = False
     nt_crawl_run = False
     kr_crawl_run = False
-    make_bipartite_img = True
+    make_bipartite_img = False
 
     task1_1_run = True # 연관 빈도수 그래프
     task1_2_run = False # 히트 알고리즘
@@ -242,7 +242,7 @@ if __name__ == "__main__":
     search1_kr = "트럼프"
     search2_kr = "바이든"
     start_date = "20201103"
-    end_date = "20210120" # 1일 더해야함
+    end_date = "20210120"
 
     if wp_crawl_run:
         # 크롤러 객체 생성
@@ -331,17 +331,17 @@ if __name__ == "__main__":
     with open('result/bigkinds/news_바이든.json', 'r', encoding='utf8') as f:
         biden_kr = json.load(f)
         
-    # with open(f'result/washingtonpost/news_trans_trump.json', 'r', encoding='utf8') as f:
-    #     trump_us = json.load(f)
-        
-    # with open(f'result/washingtonpost/news_trans_biden.json', 'r', encoding='utf8') as f:
-    #     biden_us = json.load(f)
-        
-    with open(f'result/newyorktimes/news_trans_trump.json', 'r', encoding='utf8') as f:
+    with open(f'result/washingtonpost/news_trans_trump.json', 'r', encoding='utf8') as f:
         trump_us = json.load(f)
         
-    with open(f'result/newyorktimes/news_trans_biden.json', 'r', encoding='utf8') as f:
+    with open(f'result/washingtonpost/news_trans_biden.json', 'r', encoding='utf8') as f:
         biden_us = json.load(f)
+        
+    # with open(f'result/newyorktimes/news_trans_trump.json', 'r', encoding='utf8') as f:
+    #     trump_us = json.load(f)
+        
+    # with open(f'result/newyorktimes/news_trans_biden.json', 'r', encoding='utf8') as f:
+    #     biden_us = json.load(f)
 
     print(f'trump: {len(trump_us)}')
     print(f'biden: {len(biden_us)}')
@@ -353,14 +353,14 @@ if __name__ == "__main__":
     dic_t, cbg_t, dic_b, cbg_b = None, None, None, None
 
 
-    if task1_1_run:
+    if task1_1_run or make_bipartite_img:
         # 이분그래프 생성 (networkx)
         dic_t, cbg_t = make_bipartite_graph(trump_us, trump_kr, 2, 3)
         dic_b, cbg_b = make_bipartite_graph(biden_us, biden_kr, 2, 3)
 
     dic, cbg, first_partition_nodes = None, None, None
 
-    if task1_2_run or task2_run or task3_run or task4_run or word_bipartite_run :
+    if task1_2_run or task2_run or task3_run or task4_run or word_bipartite_run or make_bipartite_img:
         us_news.update(trump_us)
         us_news.update(biden_us)
         kr_news.update(trump_kr)
@@ -372,7 +372,7 @@ if __name__ == "__main__":
 
     # 전체 이분그래프
     if make_bipartite_img:
-        mode = 2
+        mode = 1
 
         if mode == 1:
             first_partition_nodes = list(dic.keys())
@@ -452,7 +452,7 @@ if __name__ == "__main__":
         plt.clf()
         print('Task1-1 시작')
         bar_mode = False
-        normalize_mode = True
+        normalize_mode = False
 
         task1_1_trump = {}
 

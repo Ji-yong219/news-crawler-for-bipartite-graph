@@ -54,7 +54,7 @@ class NTCrawler(Crawler):
         self.driver = webdriver.Chrome(self.driver_url, chrome_options=self.chrome_options)
         self.url_num = 0
         start_date_ = datetime.date(int(start_date[:4]), int(start_date[4:6]), int(start_date[6:])) + datetime.timedelta(days=1)
-        end_date_ = datetime.date(int(end_date[:4]), int(end_date[4:6]), int(end_date[6:])) + datetime.timedelta(days=1)
+        end_date_ = datetime.date(int(end_date[:4]), int(end_date[4:6]), int(end_date[6:]))# + datetime.timedelta(days=1)
         
         while True:
             news = None
@@ -141,10 +141,16 @@ class NTCrawler(Crawler):
         rs = (grequests.get(self.news_queue[i], headers=headers, callback=fbc.feedback) for i in trange(len(self.news_queue), file=sys.stdout, desc='get Grequest'))
         a = grequests.map(rs)
         
-        self.soup_list = [ (a[i].url,bs(a[i].content, 'html.parser')) for i in trange(len(a), file=sys.stdout, desc='get html parser from bs4') if a[i] is not None]
+        # self.soup_list = [ (a[i].url,bs(a[i].content, 'html.parser')) for i in trange(len(a), file=sys.stdout, desc='get html parser from bs4') if a[i] is not None]
 
 
-        for idx, soup in enumerate(self.soup_list):
+        for i in trange(len(a), file=sys.stdout, desc='get html parser from bs4'):
+        # for idx, soup in enumerate(self.soup_list):
+            soup = None
+
+            if a[i] is not None:
+                soup = (a[i].url,bs(a[i].content, 'html.parser'))
+
             if soup is None or len(soup)<2:
                 continue
 
