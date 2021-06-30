@@ -214,11 +214,11 @@ if __name__ == "__main__":
     kr_crawl_run = False
     make_bipartite_img = False
 
-    task1_1_run = True # 연관 빈도수 그래프
+    task1_1_run = False # 연관 빈도수 그래프
     task1_2_run = False # 히트 알고리즘
     task2_run = False # 외국기사 나오고 한국기사 날짜
-    task3_run = False
-    task4_run = False
+    task3_run = False # 국내 언론사 빈도수
+    task4_run = True # 워드클라우드
 
     word_bipartite_run = False # 내가 따로 한거, 아직 ㄴ
 
@@ -540,17 +540,20 @@ if __name__ == "__main__":
             plt.plot([f'{i[4:6]}.{i[6:]}' for i in b_day], b_n, marker='s', label="Biden")
 
         table_contents = [
-                    ['`20.11.17', '아프간 이라크 추가 철군, 모더나 백신 개발'],
-                    ['`20.11.21', '트럼프장남 코로나확진, 트럼프그룹 탈세의혹'],
-                    ['`20.12.01', '트럼프 측근들 취임식 참석 설 득중, 바이든 애리조나 승리'],
-                    ['`20.12.03', '트럼프백신 영국에 선두 뺏겨, 트럼프 선거조작 연설'],
-                    ['`20.12.12', '미국 FDA 백신 긴급 승인, 24시간내 접종 시작'],
-                    ['`20.12.15', '트럼프 법무장관 해임'],
-                    ['`20.12.19', '모더나 백신 승인'],
-                    ['`20.12.23', '트럼프, 러시아 스캔들 연루 범죄자 무더기 사면'],
-                    ['`21.01.07', '트럼프 지지자들 의회 난입'],
-                    ['`21.01.09', '트럼프 트위터 계정 영구 정지, 취임식 가지 않겠다 선언'],
-                    ['`21.01.13', '의회, 트럼프 탄핵 추진']
+                    ['`20.11.04', '......'],
+                    ['`20.11.06', '......'],
+                    ['`20.11.09', '......'],
+                    ['`20.11.13', '......'],
+                    ['`20.11.17', '......'],
+                    ['`20.11.21', '......'],
+                    ['`20.11.26', '......'],
+                    ['`20.12.02', '......'],
+                    ['`20.12.09', '......'],
+                    ['`20.12.13', '......'],
+                    ['`21.01.05', '......'],
+                    ['`21.01.12', '......'],
+                    ['`21.01.13', '......'],
+                    ['`21.01.14', '......']
         ]
 
         # the_table = plt.table(cellText=table_contents,
@@ -760,17 +763,20 @@ if __name__ == "__main__":
         # trans = Translator(driver_url, chrome_options)
 
         peak_dic = {
+            '20201104':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]},
+            '20201106':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]},
+            '20201109':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]},
+            '20201113':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]},
             '20201117':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]},
             '20201121':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]},
-            '20201201':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]},
-            '20201203':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]},
-            '20201212':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]},
-            '20201215':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]},
-            '20201219':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]},
-            '20201223':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]},
-            '20210107':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]},
-            '20210109':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]},
-            '20210113':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]}
+            '20201126':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]},
+            '20201202':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]},
+            '20201209':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]},
+            '20201213':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]},
+            '20210105':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]},
+            '20210112':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]},
+            '20210113':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]},
+            '20210114':{'us':0, 'kr':0, 'us_noun':[], 'kr_noun':[]}
         }
 
 
@@ -783,7 +789,7 @@ if __name__ == "__main__":
 
                     kr_noun = []
                     for news in v:
-                        kr_noun += han.nouns( kr_news[news]['article'] )
+                        kr_noun += mcb.nouns( kr_news[news]['article'] )
 
 
                     #영어 본문 번역
@@ -816,7 +822,7 @@ if __name__ == "__main__":
                 # print(i)
             # print('\n\n')
             kr_result = kr_result.to_dict()
-            # make_wc(kr_result, peak+'kr')
+            make_wc(kr_result, peak+'kr')
 
         print('Good')
 
