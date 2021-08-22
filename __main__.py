@@ -40,7 +40,7 @@ import nltk, re
 nltk.download('punkt')
 
 import matplotlib.font_manager as fm 
-font_path = 'C:/Users/user/AppData/Local/Microsoft/Windows/Fonts/BMJUA_ttf.ttf' 
+font_path = 'C:/Users/JY/AppData/Local/Microsoft/Windows/Fonts/BMJUA_ttf.ttf' 
 fontprop = fm.FontProperties(fname=font_path, size=24) 
 plt.rcParams['font.family'] = 'NanumGothic'
 
@@ -214,11 +214,11 @@ if __name__ == "__main__":
     kr_crawl_run = False
     make_bipartite_img = False
 
-    task1_1_run = False # 연관 빈도수 그래프
-    task1_2_run = False # 히트 알고리즘
-    task2_run = False # 외국기사 나오고 한국기사 날짜
-    task3_run = False # 국내 언론사 빈도수
-    task4_run = True # 워드클라우드
+    task1_1_run = True # 연관 빈도수 그래프
+    task1_2_run = True # 히트 알고리즘
+    task2_run = True # 외국기사 나오고 한국기사 날짜
+    task3_run = True # 국내 언론사 빈도수
+    task4_run = False # 워드클라우드
 
     word_bipartite_run = False # 내가 따로 한거, 아직 ㄴ
 
@@ -331,17 +331,17 @@ if __name__ == "__main__":
     with open('result/bigkinds/news_바이든.json', 'r', encoding='utf8') as f:
         biden_kr = json.load(f)
         
-    with open(f'result/washingtonpost/news_trans_trump.json', 'r', encoding='utf8') as f:
+    # with open(f'result/washingtonpost/news_trans_trump.json', 'r', encoding='utf8') as f:
+        # trump_us = json.load(f)
+        
+    # with open(f'result/washingtonpost/news_trans_biden.json', 'r', encoding='utf8') as f:
+        # biden_us = json.load(f)
+        
+    with open(f'result/newyorktimes/news_trans_trump.json', 'r', encoding='utf8') as f:
         trump_us = json.load(f)
         
-    with open(f'result/washingtonpost/news_trans_biden.json', 'r', encoding='utf8') as f:
+    with open(f'result/newyorktimes/news_trans_biden.json', 'r', encoding='utf8') as f:
         biden_us = json.load(f)
-        
-    # with open(f'result/newyorktimes/news_trans_trump.json', 'r', encoding='utf8') as f:
-    #     trump_us = json.load(f)
-        
-    # with open(f'result/newyorktimes/news_trans_biden.json', 'r', encoding='utf8') as f:
-    #     biden_us = json.load(f)
 
     print(f'trump: {len(trump_us)}')
     print(f'biden: {len(biden_us)}')
@@ -560,9 +560,9 @@ if __name__ == "__main__":
         #                   colLabels=['Date', 'Event'],
         #                   loc='top', colWidths=[0.2, 0.2])
 
-        plt.title('날짜별 연관기사 빈도수 그래프', fontproperties=fontprop)
-        plt.ylabel('연관기사 빈도수', fontproperties=fontprop)
-        plt.xlabel('날짜', fontproperties=fontprop)
+        plt.title('Associates by Date Frequency Graph', fontproperties=fontprop)
+        plt.ylabel('Associated article frequency', fontproperties=fontprop)
+        plt.xlabel('Date', fontproperties=fontprop)
 
         plt.xticks(x, labels, rotation=45)
         plt.legend(loc='upper left', fontsize=16)
@@ -669,9 +669,9 @@ if __name__ == "__main__":
         else:
             plt.plot([f'{i[4:6]}.{i[6:]}' for i in b_day], b_n, marker='o', label="Biden")
 
-        plt.title('날짜별 미국기사와 한국기사 시차 평균', fontproperties=fontprop)
-        plt.ylabel('시차 평균(시간)', fontproperties=fontprop)
-        plt.xlabel('날짜', fontproperties=fontprop)
+        plt.title('Average time difference between US and KR articles by date', fontproperties=fontprop)
+        plt.ylabel('Parallax Mean (hours)', fontproperties=fontprop)
+        plt.xlabel('Date', fontproperties=fontprop)
 
         plt.xticks(x, labels, rotation=45)
         # plt.legend(loc='upper left')
@@ -724,9 +724,9 @@ if __name__ == "__main__":
 
         rects = plt.bar(x, [i[1] for i in target], align='center')
         
-        plt.title('국내 언론사 빈도수 순위', fontproperties=fontprop)
-        plt.ylabel('빈도수', fontproperties=fontprop)
-        plt.xlabel('언론사', fontproperties=fontprop)
+        plt.title('Rankings of frequency for Koean media', fontproperties=fontprop)
+        plt.ylabel('Frequency', fontproperties=fontprop)
+        plt.xlabel('Media', fontproperties=fontprop)
 
         plt.xticks(x, labels, rotation=30, fontsize=12)
         # plt.legend(loc='upper left')
